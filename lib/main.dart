@@ -27,8 +27,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FlutterNfcReader.read().then((value) => print(
-        "id: ${value.id}, content: ${value.content}, status: ${value.status}"));
     return StoreProvider<NfcState>(
       // Pass the store to the StoreProvider. Any ancestor `StoreConnector`
       // Widgets will find and use this value as the `Store`.
