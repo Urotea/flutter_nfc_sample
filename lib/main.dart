@@ -1,37 +1,51 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:nfc_sample/actions/app_actions.dart';
+import 'package:nfc_sample/reducers/nfc_reducer.dart';
+import 'package:nfc_sample/state/nfc_state.dart';
+import 'package:redux/redux.dart';
+
+import 'middleware/nfc_middleware.dart';
 
 void main() {
-  runApp(MyApp());
+  final store = Store<NfcState>(
+    nfcReducer,
+    initialState: NfcState(),
+    middleware: [nfcMiddleware],
+  );
+  runApp(MyApp(store: store, title: "NFC_APP"));
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  final Store<NfcState> store;
+  final String title;
+
+  MyApp({Key key, @required this.store, @required this.title})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    FlutterNfcReader.read().then((value) => print("id: ${value.id}, content: ${value.content}, status: ${value.status}"));
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+    FlutterNfcReader.read().then((value) => print(
+        "id: ${value.id}, content: ${value.content}, status: ${value.status}"));
+    return StoreProvider<NfcState>(
+      // Pass the store to the StoreProvider. Any ancestor `StoreConnector`
+      // Widgets will find and use this value as the `Store`.
+      store: store,
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: MyHomePage(title: this.title),
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -44,24 +58,6 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -70,46 +66,47 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        appBar: AppBar(
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text(this.title),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: StoreConnector<NfcState, _BodyArgs>(
+          converter: (store) => _BodyArgs(
+            id: store.state.cardId,
+            content: store.state.content,
+          ),
+          builder: (context, arg) => Center(
+            child: Column(
+              children: [
+                Text("card id: ${arg.id}",
+                    style: Theme.of(context).textTheme.headline4),
+                Text("card content: ${arg.content}",
+                    style: Theme.of(context).textTheme.headline4),
+              ],
+            ),
+          ),
+        ),
+        floatingActionButton: StoreConnector<NfcState, Function()>(
+          converter: (store) =>
+              () => store.dispatch(AppActions.listenStartButtonTapped()),
+          builder: (context, arg) => FloatingActionButton(
+            onPressed: arg,
+            tooltip: 'Increment',
+            child: Icon(Icons.add),
+          ),
+        ));
   }
+}
+
+class _BodyArgs extends Equatable {
+  final String id;
+  final String content;
+
+  _BodyArgs({@required this.id, @required this.content})
+      : assert(id != null),
+        assert(content != null);
+
+  @override
+  List<Object> get props => [id, content];
 }
