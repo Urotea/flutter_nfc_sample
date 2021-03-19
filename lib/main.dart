@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:nfc_sample/actions/app_actions.dart';
+import 'package:nfc_sample/middleware/navigation_middleware.dart';
 import 'package:nfc_sample/reducers/nfc_reducer.dart';
 import 'package:nfc_sample/state/nfc_state.dart';
 import 'package:redux/redux.dart';
@@ -10,49 +10,27 @@ import 'package:redux/redux.dart';
 import 'middleware/nfc_middleware.dart';
 
 void main() {
+  final navigatorKey = new GlobalKey<NavigatorState>();
+  final themeData = ThemeData(primarySwatch: Colors.blue);
   final store = Store<NfcState>(
     nfcReducer,
     initialState: NfcState(),
-    middleware: [nfcMiddleware],
+    middleware: [nfcMiddleware, NavigationMiddleware(navigatorKey)],
   );
-  runApp(MyApp(store: store, title: "NFC_APP"));
-}
 
-class MyApp extends StatelessWidget {
-  final Store<NfcState> store;
-  final String title;
-
-  MyApp({Key key, @required this.store, @required this.title})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return StoreProvider<NfcState>(
-      // Pass the store to the StoreProvider. Any ancestor `StoreConnector`
-      // Widgets will find and use this value as the `Store`.
-      store: store,
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: MyHomePage(title: this.title),
-      ),
-    );
-  }
+  runApp(StoreProvider<NfcState>(
+    store: store,
+    child: MaterialApp(
+      navigatorKey: navigatorKey,
+      title: 'Flutter Demo',
+      theme: themeData,
+      home: MyHomePage(title: "NFC_APP"),
+    ),
+  ));
 }
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override

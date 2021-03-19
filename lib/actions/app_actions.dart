@@ -5,5 +5,6 @@ part 'app_actions.freezed.dart';
 @freezed
 abstract class AppActions with _$AppActions {
   const factory AppActions.listenStartButtonTapped() = ListenStartButtonTapped;
-  const factory AppActions.nfcListened(String cardId, String content) = NfcListened;
+  const factory AppActions.nfcListened(String cardId, String content) =
+      NfcListened;
 }
