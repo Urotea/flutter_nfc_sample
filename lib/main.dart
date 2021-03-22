@@ -24,7 +24,7 @@ class PageControllerWidget extends StatelessWidget {
       initialState: NfcState(),
       middleware: [
         nfcMiddleware,
-        NavigationMiddleware(_navigatorKey),
+        NavigationMiddleware(this._navigatorKey),
       ],
     );
     this._pages = [
@@ -41,17 +41,17 @@ class PageControllerWidget extends StatelessWidget {
         store: this._store,
         child: StoreConnector<NfcState, Pages>(
           converter: (store) => Pages.MAIN,
-          builder: (BuildContext context, Pages page) => WillPopScope(
-            onWillPop: () async =>
-                !await this._navigatorKey.currentState.maybePop(),
-            child: MaterialApp(
-              theme: this._themeData,
-              home: Navigator(
+          builder: (BuildContext context, Pages page) => MaterialApp(
+            theme: this._themeData,
+            title: "NATIVE",
+            home: WillPopScope(
+            onWillPop: () async => false,
+            child: Navigator(
                 key: this._navigatorKey,
                 pages: this._pages,
                 onPopPage: (route, result) => this._onPopPage(route, result),
-              ),
             ),
+          ),
           ),
         ),
       );

@@ -6,28 +6,27 @@ import 'package:nfc_sample/state/nfc_state.dart';
 import 'package:redux/redux.dart';
 
 class NavigationMiddleware extends MiddlewareClass<NfcState> {
-  final GlobalKey<NavigatorState> navigatorKey;
+  final GlobalKey<NavigatorState> _navigatorKey;
 
-  NavigationMiddleware(this.navigatorKey);
+  NavigationMiddleware(this._navigatorKey);
 
   @override
   void call(Store<NfcState> store, dynamic action, NextDispatcher next) {
     if (action is NfcListened) {
+      // if(store.state.listening) {
+      //   Navigator.of(this._navigatorKey.currentContext).pop();
+      // }
       next(action);
       return;
     }
 
     if (action is ListenStartButtonTapped) {
-      if (store.state.listening) {
-        this.navigatorKey.currentState.pop();
-        return;
-      }
       next(action);
 
       FlutterNfcReader.read().then((value) =>
           store.dispatch(AppActions.nfcListened(value.id, value.content)));
       showDialog(
-        context: this.navigatorKey.currentContext,
+        context: this._navigatorKey.currentContext,
         barrierDismissible: false,
         builder: (context) => Center(
           child: Column(
@@ -35,7 +34,7 @@ class NavigationMiddleware extends MiddlewareClass<NfcState> {
             children: [
               Text(
                 "NFC認識中",
-                style: Theme.of(this.navigatorKey.currentContext)
+                style: Theme.of(this._navigatorKey.currentContext)
                     .textTheme
                     .apply(bodyColor: Colors.white, displayColor: Colors.white)
                     .headline4,
