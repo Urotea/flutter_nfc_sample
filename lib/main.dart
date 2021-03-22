@@ -1,88 +1,62 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:nfc_sample/actions/app_actions.dart';
-import 'package:nfc_sample/middleware/navigation_middleware.dart';
+import 'package:nfc_sample/pages/main_page.dart';
 import 'package:nfc_sample/reducers/nfc_reducer.dart';
 import 'package:nfc_sample/state/nfc_state.dart';
+import 'package:nfc_sample/state/pages.dart';
 import 'package:redux/redux.dart';
 
+import 'middleware/navigation_middleware.dart';
 import 'middleware/nfc_middleware.dart';
 
-void main() {
-  final navigatorKey = new GlobalKey<NavigatorState>();
-  final themeData = ThemeData(primarySwatch: Colors.blue);
-  final store = Store<NfcState>(
-    nfcReducer,
-    initialState: NfcState(),
-    middleware: [nfcMiddleware, NavigationMiddleware(navigatorKey)],
-  );
+void main() => runApp(PageControllerWidget());
 
-  runApp(StoreProvider<NfcState>(
-    store: store,
-    child: MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'Flutter Demo',
-      theme: themeData,
-      home: MyHomePage(title: "NFC_APP"),
-    ),
-  ));
-}
+@immutable
+class PageControllerWidget extends StatelessWidget {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  final _themeData = ThemeData(primarySwatch: Colors.blue);
+  Store<NfcState> _store;
+  List<Page<dynamic>> _pages;
 
-class MyHomePage extends StatelessWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  PageControllerWidget({Key key}) : super(key: key) {
+    this._store = Store<NfcState>(
+      nfcReducer,
+      initialState: NfcState(),
+      middleware: [
+        nfcMiddleware,
+        NavigationMiddleware(_navigatorKey),
+      ],
+    );
+    this._pages = [
+      MaterialPage(
+        child: MainPage(
+          title: "NFC_APP",
+        ),
+      ),
+    ];
+  }
 
   @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(this.title),
-        ),
-        body: StoreConnector<NfcState, _BodyArgs>(
-          converter: (store) => _BodyArgs(
-            id: store.state.cardId,
-            content: store.state.content,
-          ),
-          builder: (context, arg) => Center(
-            child: Column(
-              children: [
-                Text("card id: ${arg.id}",
-                    style: Theme.of(context).textTheme.headline4),
-                Text("card content: ${arg.content}",
-                    style: Theme.of(context).textTheme.headline4),
-              ],
+  Widget build(BuildContext context) => StoreProvider<NfcState>(
+        store: this._store,
+        child: StoreConnector<NfcState, Pages>(
+          converter: (store) => Pages.MAIN,
+          builder: (BuildContext context, Pages page) => WillPopScope(
+            onWillPop: () async =>
+                !await this._navigatorKey.currentState.maybePop(),
+            child: MaterialApp(
+              theme: this._themeData,
+              home: Navigator(
+                key: this._navigatorKey,
+                pages: this._pages,
+                onPopPage: (route, result) => this._onPopPage(route, result),
+              ),
             ),
           ),
         ),
-        floatingActionButton: StoreConnector<NfcState, Function()>(
-          converter: (store) =>
-              () => store.dispatch(AppActions.listenStartButtonTapped()),
-          builder: (context, arg) => FloatingActionButton(
-            onPressed: arg,
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-          ),
-        ));
+      );
+
+  bool _onPopPage(Route<dynamic> route, dynamic result) {
+    return route.didPop(result);
   }
-}
-
-class _BodyArgs extends Equatable {
-  final String id;
-  final String content;
-
-  _BodyArgs({@required this.id, @required this.content})
-      : assert(id != null),
-        assert(content != null);
-
-  @override
-  List<Object> get props => [id, content];
 }

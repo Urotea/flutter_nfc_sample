@@ -13,10 +13,10 @@ void nfcMiddleware(Store<NfcState> store, dynamic action, NextDispatcher next) {
   }
 
   if (action is ListenStartButtonTapped) {
-    if (store.state.listened) {
+    next(action);
+    if (store.state.listening) {
       return;
     }
-    next(action);
     FlutterNfcReader.read().then((value) =>
         store.dispatch(AppActions.nfcListened(value.id, value.content)));
   }

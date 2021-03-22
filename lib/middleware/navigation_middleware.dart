@@ -18,11 +18,12 @@ class NavigationMiddleware extends MiddlewareClass<NfcState> {
     }
 
     if (action is ListenStartButtonTapped) {
-      if (store.state.listened) {
+      if (store.state.listening) {
         this.navigatorKey.currentState.pop();
         return;
       }
       next(action);
+
       FlutterNfcReader.read().then((value) =>
           store.dispatch(AppActions.nfcListened(value.id, value.content)));
       showDialog(

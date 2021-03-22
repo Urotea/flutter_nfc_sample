@@ -12,10 +12,10 @@ NfcState nfcReducer(NfcState state, dynamic action) {
 
 NfcState _AppActionReducer(NfcState state, AppActions action) {
   final newState = action.map(
-    nfcListened: (NfcListened value) => state.copyWith(
-        cardId: value.cardId, content: value.content, listened: false),
     listenStartButtonTapped: (ListenStartButtonTapped value) =>
-        state.copyWith(listened: true),
+        state.copyWith(listening: true),
+    nfcListened: (NfcListened value) => state.copyWith(
+        cardId: value.cardId, content: value.content, listening: false),
   );
 
   return newState;

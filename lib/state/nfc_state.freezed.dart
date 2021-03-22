@@ -15,11 +15,15 @@ class _$NfcStateTearOff {
 
 // ignore: unused_element
   _NfcState call(
-      {String cardId = "", String content = "", bool listened = false}) {
+      {String cardId = "",
+      String content = "",
+      Pages page = Pages.MAIN,
+      bool listening = false}) {
     return _NfcState(
       cardId: cardId,
       content: content,
-      listened: listened,
+      page: page,
+      listening: listening,
     );
   }
 }
@@ -32,7 +36,8 @@ const $NfcState = _$NfcStateTearOff();
 mixin _$NfcState {
   String get cardId;
   String get content;
-  bool get listened;
+  Pages get page;
+  bool get listening;
 
   @JsonKey(ignore: true)
   $NfcStateCopyWith<NfcState> get copyWith;
@@ -42,7 +47,7 @@ mixin _$NfcState {
 abstract class $NfcStateCopyWith<$Res> {
   factory $NfcStateCopyWith(NfcState value, $Res Function(NfcState) then) =
       _$NfcStateCopyWithImpl<$Res>;
-  $Res call({String cardId, String content, bool listened});
+  $Res call({String cardId, String content, Pages page, bool listening});
 }
 
 /// @nodoc
@@ -57,12 +62,14 @@ class _$NfcStateCopyWithImpl<$Res> implements $NfcStateCopyWith<$Res> {
   $Res call({
     Object cardId = freezed,
     Object content = freezed,
-    Object listened = freezed,
+    Object page = freezed,
+    Object listening = freezed,
   }) {
     return _then(_value.copyWith(
       cardId: cardId == freezed ? _value.cardId : cardId as String,
       content: content == freezed ? _value.content : content as String,
-      listened: listened == freezed ? _value.listened : listened as bool,
+      page: page == freezed ? _value.page : page as Pages,
+      listening: listening == freezed ? _value.listening : listening as bool,
     ));
   }
 }
@@ -72,7 +79,7 @@ abstract class _$NfcStateCopyWith<$Res> implements $NfcStateCopyWith<$Res> {
   factory _$NfcStateCopyWith(_NfcState value, $Res Function(_NfcState) then) =
       __$NfcStateCopyWithImpl<$Res>;
   @override
-  $Res call({String cardId, String content, bool listened});
+  $Res call({String cardId, String content, Pages page, bool listening});
 }
 
 /// @nodoc
@@ -88,22 +95,29 @@ class __$NfcStateCopyWithImpl<$Res> extends _$NfcStateCopyWithImpl<$Res>
   $Res call({
     Object cardId = freezed,
     Object content = freezed,
-    Object listened = freezed,
+    Object page = freezed,
+    Object listening = freezed,
   }) {
     return _then(_NfcState(
       cardId: cardId == freezed ? _value.cardId : cardId as String,
       content: content == freezed ? _value.content : content as String,
-      listened: listened == freezed ? _value.listened : listened as bool,
+      page: page == freezed ? _value.page : page as Pages,
+      listening: listening == freezed ? _value.listening : listening as bool,
     ));
   }
 }
 
 /// @nodoc
 class _$_NfcState implements _NfcState {
-  _$_NfcState({this.cardId = "", this.content = "", this.listened = false})
+  _$_NfcState(
+      {this.cardId = "",
+      this.content = "",
+      this.page = Pages.MAIN,
+      this.listening = false})
       : assert(cardId != null),
         assert(content != null),
-        assert(listened != null);
+        assert(page != null),
+        assert(listening != null);
 
   @JsonKey(defaultValue: "")
   @override
@@ -111,13 +125,16 @@ class _$_NfcState implements _NfcState {
   @JsonKey(defaultValue: "")
   @override
   final String content;
+  @JsonKey(defaultValue: Pages.MAIN)
+  @override
+  final Pages page;
   @JsonKey(defaultValue: false)
   @override
-  final bool listened;
+  final bool listening;
 
   @override
   String toString() {
-    return 'NfcState(cardId: $cardId, content: $content, listened: $listened)';
+    return 'NfcState(cardId: $cardId, content: $content, page: $page, listening: $listening)';
   }
 
   @override
@@ -129,9 +146,11 @@ class _$_NfcState implements _NfcState {
             (identical(other.content, content) ||
                 const DeepCollectionEquality()
                     .equals(other.content, content)) &&
-            (identical(other.listened, listened) ||
+            (identical(other.page, page) ||
+                const DeepCollectionEquality().equals(other.page, page)) &&
+            (identical(other.listening, listening) ||
                 const DeepCollectionEquality()
-                    .equals(other.listened, listened)));
+                    .equals(other.listening, listening)));
   }
 
   @override
@@ -139,7 +158,8 @@ class _$_NfcState implements _NfcState {
       runtimeType.hashCode ^
       const DeepCollectionEquality().hash(cardId) ^
       const DeepCollectionEquality().hash(content) ^
-      const DeepCollectionEquality().hash(listened);
+      const DeepCollectionEquality().hash(page) ^
+      const DeepCollectionEquality().hash(listening);
 
   @JsonKey(ignore: true)
   @override
@@ -148,15 +168,20 @@ class _$_NfcState implements _NfcState {
 }
 
 abstract class _NfcState implements NfcState {
-  factory _NfcState({String cardId, String content, bool listened}) =
-      _$_NfcState;
+  factory _NfcState(
+      {String cardId,
+      String content,
+      Pages page,
+      bool listening}) = _$_NfcState;
 
   @override
   String get cardId;
   @override
   String get content;
   @override
-  bool get listened;
+  Pages get page;
+  @override
+  bool get listening;
   @override
   @JsonKey(ignore: true)
   _$NfcStateCopyWith<_NfcState> get copyWith;
